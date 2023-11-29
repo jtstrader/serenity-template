@@ -1,0 +1,27 @@
+on: push
+name: Build Project
+jobs:
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+
+      - name: Build Debug
+        run: cargo build --all-features
+
+      - name: Build Release
+        run: cargo build --release --all-features
+
+      - name: Clippy
+        run: cargo clippy --all-features -- -Dwarnings
+
+      - name: Test
+        run: cargo test
