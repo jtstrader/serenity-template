@@ -31,6 +31,11 @@ cargo build --locked --release
 cp ./target/release/$APP_NAME /bin/bot
 EOF
 
+# Mount secrets and load token into the build.
+RUN --mount=type=secret,id=discord_token \
+    mkdir /tokens && cat /run/secrets/discord_token > /tokens/discord
+
+
 ################################################################################
 # Create a new stage for running the application that contains the minimal
 # runtime dependencies for the application. This often uses a different base
@@ -59,6 +64,7 @@ USER appuser
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/bot /bin/
+COPY --from=build /tokens/discord /tokens/discord
 
 EXPOSE 8080
 

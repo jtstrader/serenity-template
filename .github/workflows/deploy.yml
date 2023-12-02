@@ -19,6 +19,9 @@ jobs:
       image: ${{ steps.dbp.outputs.imageid }}
 
     steps:
+      - name: Verify Token
+        run: echo ${{ secrets.DISCORD_TOKEN }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -51,8 +54,8 @@ jobs:
           context: . # To ensure that Cargo.lock is present from prior build step.
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:latest
-          build-args: |
-            "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}"
+          secrets: |
+            "discord_token=${{ secrets.DISCORD_TOKEN }}"
   gcp:
     name: Deploy to GCP
     runs-on: ubuntu-latest

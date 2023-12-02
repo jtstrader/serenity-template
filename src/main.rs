@@ -3,7 +3,10 @@
 //! This code, along with additional information about Serenity, can be found
 //! [here](https://github.com/serenity-rs/serenity).
 
-use std::env;
+mod secrets;
+mod utils;
+
+use utils::gcp;
 
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
@@ -21,12 +24,18 @@ struct Handler;
 impl EventHandler for Handler {}
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
+    let gcp_listener_handle = tokio::spawn(async {
+        if let Err(e) = gcp::CloudRunListener::default().listen().await {
+            eprintln!("{}", e);
+        }
+    });
+
+    // Login with a bot token from the environment
+    let token = secrets::get_discord_token()?;
     let framework = StandardFramework::new().group(&GENERAL_GROUP);
     framework.configure(Configuration::new().prefix("~")); // set the bot's prefix to "~"
 
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("token");
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
@@ -37,7 +46,10 @@ async fn main() {
     // start listening for events by starting a single shard
     if let Err(why) = client.start().await {
         println!("An error occurred while running the client: {:?}", why);
+        gcp_listener_handle.abort();
     }
+
+    Ok(())
 }
 
 #[command]
