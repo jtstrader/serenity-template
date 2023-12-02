@@ -53,10 +53,30 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:latest
 
   gcp:
-    name: Deploy to GCP Project
+    name: Deploy to GCP
     runs-on: ubuntu-latest
     needs: docker
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
-      - name: Verify
-        run: echo ${{ needs.docker.outputs.image }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Deploy Docker Image to GCP
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          region: ${{ vars.GCP_SERVICE_REGION }}
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:latest
+          service: bot
+
+      - name: Verify Deployment
+        run: curl "${{ steps.deploy.outputs.url }}"

@@ -60,5 +60,7 @@ USER appuser
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/bot /bin/
 
+EXPOSE 8080
+
 # What the container should run when it is started.
 CMD ["/bin/bot"]
