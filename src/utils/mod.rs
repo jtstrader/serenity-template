@@ -2,3 +2,4 @@
 
 pub(crate) mod constants;
 pub(crate) mod gcp;
+pub(crate) mod logging;

@@ -6,6 +6,9 @@
 mod secrets;
 mod utils;
 
+use std::process::exit;
+
+use log;
 use utils::gcp;
 
 use serenity::async_trait;
@@ -25,14 +28,23 @@ impl EventHandler for Handler {}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    gcp::setup_gcp_logger()?;
+
     let gcp_listener_handle = tokio::spawn(async {
         if let Err(e) = gcp::CloudRunListener::default().listen().await {
-            eprintln!("{}", e);
+            log::error!("{}", e);
         }
     });
 
     // Login with a bot token from the secrets location.
-    let token = secrets::get_discord_token()?;
+    let token = match secrets::get_discord_token() {
+        Ok(token) => token,
+        Err(e) => {
+            log::error!("Could not obtain discord token with error: {}", e);
+            exit(1);
+        }
+    };
+
     let framework = StandardFramework::new().group(&GENERAL_GROUP);
     framework.configure(Configuration::new().prefix("~")); // Set the bot's prefix to "~".
 
@@ -44,8 +56,9 @@ async fn main() -> anyhow::Result<()> {
         .expect("Error creating client");
 
     // Start listening for events by starting a single shard.
+    log::info!("Discord client created. Listening for requests.");
     if let Err(why) = client.start().await {
-        println!("An error occurred while running the client: {:?}", why);
+        log::error!("An error occurred while running the client: {:?}", why);
         gcp_listener_handle.abort();
     }
 
