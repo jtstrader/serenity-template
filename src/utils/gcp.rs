@@ -3,8 +3,6 @@
 //! This module primarily focuses on GCP deployment helpers and the listener, which is required
 //! for the [Cloud Run container runtime contract](https://cloud.google.com/run/docs/container-contract).
 
-use crate::utils::logging;
-
 use std::env;
 
 use tokio::net::TcpListener;
@@ -64,21 +62,9 @@ impl CloudRunListener {
     /// in the [`CloudRunConfig`], this address may be different.
     pub(crate) async fn listen(&self) -> anyhow::Result<()> {
         let listener = TcpListener::bind(&self.config.address).await?;
-        println!("Listening on {}", &self.config.address);
+        log::info!("Listening on {}", &self.config.address);
 
         while let Ok(_) = listener.accept().await { /* connection handling code */ }
         Ok(())
     }
-}
-
-/// Create a GCP logger with a JSON format.
-pub(crate) fn setup_gcp_logger() -> anyhow::Result<()> {
-    log::set_boxed_logger(Box::new(logging::Logger::custom(logging::LogFormat::Json)))?;
-    if cfg!(debug_assertions) {
-        log::set_max_level(log::LevelFilter::Trace);
-    } else {
-        log::set_max_level(log::LevelFilter::Info);
-    }
-
-    Ok(())
 }

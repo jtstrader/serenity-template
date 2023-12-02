@@ -18,6 +18,8 @@ services:
       - "8080:8080"
     expose:
       - "8080"
+    environment:
+      - LOG_FORMAT=text
 
 secrets:
   discord_token:

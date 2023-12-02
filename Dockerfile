@@ -68,5 +68,10 @@ COPY --from=build /tokens/discord /tokens/discord
 
 EXPOSE 8080
 
+# Set relevant environment variables for the project.
+ENV LOG_FORMAT=json
+ENV RUST_BACKTRACE=1
+ENV RUST_LOG_TARGETS=enter_bot_name_here,serenity
+
 # What the container should run when it is started.
 CMD ["/bin/bot"]

@@ -9,7 +9,7 @@ mod utils;
 use std::process::exit;
 
 use log;
-use utils::gcp;
+use utils::{gcp, logging};
 
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
@@ -28,11 +28,12 @@ impl EventHandler for Handler {}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    gcp::setup_gcp_logger()?;
+    logging::setup_logger()?;
 
     let gcp_listener_handle = tokio::spawn(async {
         if let Err(e) = gcp::CloudRunListener::default().listen().await {
             log::error!("{}", e);
+            exit(1);
         }
     });
 
