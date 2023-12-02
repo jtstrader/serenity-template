@@ -16,7 +16,8 @@ services:
       - "8080:8080"
     expose:
       - "8080"
-
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

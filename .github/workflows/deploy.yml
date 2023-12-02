@@ -51,7 +51,8 @@ jobs:
           context: . # To ensure that Cargo.lock is present from prior build step.
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:latest
-
+          build-args: |
+            "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}"
   gcp:
     name: Deploy to GCP
     runs-on: ubuntu-latest
@@ -76,7 +77,4 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           region: ${{ vars.GCP_SERVICE_REGION }}
           image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:latest
-          service: bot
-
-      - name: Verify Deployment
-        run: curl "${{ steps.deploy.outputs.url }}"
+          service: discord-bot
