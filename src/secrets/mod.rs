@@ -1,3 +1,6 @@
+//! Secret management for this project. All secrets are expected to come from
+//! GitHub secrets and/or secrets created and passed through the Docker container.
+
 use crate::utils::constants;
 use anyhow::Context;
 use std::fs;

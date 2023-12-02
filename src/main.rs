@@ -31,10 +31,10 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
-    // Login with a bot token from the environment
+    // Login with a bot token from the secrets location.
     let token = secrets::get_discord_token()?;
     let framework = StandardFramework::new().group(&GENERAL_GROUP);
-    framework.configure(Configuration::new().prefix("~")); // set the bot's prefix to "~"
+    framework.configure(Configuration::new().prefix("~")); // Set the bot's prefix to "~".
 
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
     let mut client = Client::builder(token, intents)
@@ -43,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
         .await
         .expect("Error creating client");
 
-    // start listening for events by starting a single shard
+    // Start listening for events by starting a single shard.
     if let Err(why) = client.start().await {
         println!("An error occurred while running the client: {:?}", why);
         gcp_listener_handle.abort();
