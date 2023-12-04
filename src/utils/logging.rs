@@ -63,7 +63,7 @@ pub struct LogTargets {
 impl Default for LogTargets {
     fn default() -> Self {
         let targets: Vec<_> = env::var("RUST_LOG_TARGETS")
-            .map(|cvs| cvs.split(",").map(String::from).collect())
+            .map(|csv| csv.split(",").map(String::from).collect())
             .unwrap_or(vec![env!("CARGO_PKG_NAME").to_owned()]);
         let all = targets.iter().any(|target| target.to_lowercase() == "all");
 
